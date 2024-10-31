@@ -1,12 +1,21 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
 from pymongo import MongoClient
 from datetime import datetime, timedelta
 import geopy.distance
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from the .env file
+load_dotenv()
 
 # MongoDB client setup
-client = MongoClient('mongodb+srv://udanthaisuru:UabNfemjvTGzbk93@lora-reseaech.hmuyg.mongodb.net/')
-db = client['fishing_db']
+mongodb_url = os.getenv("MONGODB_URL")
+if not mongodb_url:
+    raise ValueError("MONGODB_URL is not set in the environment variables")
+
+client = MongoClient(mongodb_url)
+db = client['aquasafe']
 fishing_locations = db['fishing_locations']
 
 app = FastAPI()
@@ -65,8 +74,8 @@ def deactivate_old_locations():
 
 # GET endpoint to provide the best fishing hotspot recommendation
 @app.get("/fishing_hotspots")
-async def fishing_hotspots(request: LocationRequest):
-    best_location = get_best_fishing_location(request.latitude, request.longitude)
+async def fishing_hotspots(latitude: float = Query(...), longitude: float = Query(...)):
+    best_location = get_best_fishing_location(latitude, longitude)
     
     if best_location:
         return {
@@ -75,6 +84,7 @@ async def fishing_hotspots(request: LocationRequest):
         }
     else:
         raise HTTPException(status_code=404, detail="No suitable fishing location found")
+
 
 # To handle adaptive learning based on fishermen's wait time at a location
 @app.post("/update_location")
