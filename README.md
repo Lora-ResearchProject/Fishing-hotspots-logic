@@ -17,7 +17,7 @@ This is a modal that develops a fishing spot prediction model to help anglers id
 1. Install all the dependencies `pip install -r requirements.txt`
 1. Start the server `uvicorn app:app --reload`
 
-#### Other commands
+### Other commands
 
 1. Generate the requirements.txt file `pip freeze > requirements.txt`
 
