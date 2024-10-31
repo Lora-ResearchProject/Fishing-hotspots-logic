@@ -20,8 +20,8 @@ fishing_locations = db['fishing_locations']
 
 app = FastAPI()
 
-MAX_DISTANCE_THRESHOLD = 50  # Max distance in km for suggesting locations
-MAX_VISIT_THRESHOLD = 10     # Max visit count to avoid overcrowding
+MAX_DISTANCE_THRESHOLD = float(os.getenv("MAX_DISTANCE_THRESHOLD", "50"))
+MAX_VISIT_THRESHOLD = int(os.getenv("MAX_VISIT_THRESHOLD", "10"))
 
 # Request model for input coordinates
 class LocationRequest(BaseModel):
