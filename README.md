@@ -2,9 +2,11 @@
 
 ## Description
 
-This is a modal that develops a fishing spot prediction model to help anglers identify optimal locations for successful fishing based on environmental and historical data.
+This is a model that develops a fishing spot prediction system to help anglers identify optimal fishing locations. The model considers factors such as fuel efficiency, environmental sustainability, and adaptive learning from historical data to suggest productive fishing spots while balancing ecosystem impact.
 
 ## Usage
+
+The system provides an API that can be queried with a latitude and longitude to receive recommendations on the best fishing locations. The model takes into account recent activity and visit patterns to distribute fishermen evenly and conserve fish populations. Additionally, the system learns over time, adjusting hotspots based on live fishing patterns.
 
 ## Installation
 
@@ -22,6 +24,24 @@ This is a modal that develops a fishing spot prediction model to help anglers id
 1. Generate the requirements.txt file `pip freeze > requirements.txt`
 
 ## API Integration
+
+1. Get Best Fishing Location
+   - Endpoint: `/fishing_hotspots`
+   - Method: `GET`
+   - Query Parameters:
+     - `latitude` (float): Latitude of the current location.
+     - `longitude` (float): Longitude of the current location.
+   - Description: Returns the optimal fishing location based on fuel efficiency, visit count, and historical hotspot data.
+   - Example Request:
+     - GET `http://127.0.0.1:8000/fishing_hotspots?latitude=56.127788&longitude=12.310137`
+   - Example Response:
+       - `{
+    "status": "success",
+    "best_location": {
+        "latitude": 56.130000,
+        "longitude": 12.315000
+    }
+}`
 
 ## Compatible versions
 
