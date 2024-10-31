@@ -25,22 +25,42 @@ The system provides an API that can be queried with a latitude and longitude to 
 
 ## API Integration
 
-1.  Get Best Fishing Location - Endpoint: `/fishing_hotspots` - Method: `GET` - Query Parameters: - `latitude` (float): Latitude of the current location. - `longitude` (float): Longitude of the current location. - Description: Returns the optimal fishing location based on fuel efficiency, visit count, and historical hotspot data. - Example Request: - `GET http://127.0.0.1:8000/fishing_hotspots?latitude=56.127788&longitude=12.310137` - Example Response: - `{
-    "status": "success",
-    "best_location": {
-    "latitude": 56.130000,
-    "longitude": 12.315000
-    }
+1.  Get Best Fishing Location
+        - Endpoint: `/fishing_hotspots`
+        - Method: `GET`
+        - Query Parameters:
+          - `latitude` (float): Latitude of the current location.
+          - `longitude` (float): Longitude of the current location.
+        - Description: Returns the optimal fishing location based on fuel efficiency, visit count, and historical hotspot data.
+        - Example Request:
+          - `GET http://127.0.0.1:8000/fishing_hotspots?latitude=56.127788&longitude=12.310137`
+        - Example Response: - `{
+        "status": "success",
+        "best_location": {
+            "latitude": 56.130000,
+            "longitude": 12.315000
+        }
 
     }`
 
-2.  Update Location Data (Adaptive Learning) - Endpoint: `/update_location` - Method: `POST` - Body: - location_id (string): Unique identifier for the fishing location. - wait_time_minutes (integer): Time (in minutes) that a fisherman waited at a location. - Description: Updates the model with time spent at a location, helping it adapt to popular hotspots and deactivating unused spots. - Example Request: - `POST http://127.0.0.1:8000/update_location
+2.  Update Location Data (Adaptive Learning)
+    - Endpoint: `/update_location`
+    - Method: `POST`
+    - Body:
+      - location_id (string): Unique identifier for the fishing location.
+      - wait_time_minutes (integer): Time (in minutes) that a fisherman waited at a location.
+    - Description: Updates the model with time spent at a location, helping it adapt to popular hotspots and deactivating unused spots.
+    - Example Request:
+      - ` POST http://127.0.0.1:8000/update_location
 {
 "location_id": "211477000-3",
 "wait_time_minutes": 35
-}` - Example Response: - `{
+} `
+    - Example Response:
+        - `{
     "status": "updated"
 }`
+
 
 ## Compatible versions
 
