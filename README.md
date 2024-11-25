@@ -30,10 +30,12 @@ The system provides an API that can be queried with a latitude and longitude to 
 - **Endpoint: POST /save_fishing_location**
 - This API endpoint is used to save fishing hotspot data to the database.
 - Requested Parameteres:
+
   - id (string): Vessel ID and Message ID separated by a hyphen (-)
   - l (string): Latitude and Longitude saparated by a hyphen (-)
   - f (integer): Indicator (used to mark whether this is a fishing hotspot message)
 - Reqeusted Body Example:
+
   ```
   {
     "id": "123-4567",
@@ -61,7 +63,6 @@ The system provides an API that can be queried with a latitude and longitude to 
       }
     }
     ```
-
   - Failure (Duplicate Location):
 
     ```
@@ -77,6 +78,7 @@ The system provides an API that can be queried with a latitude and longitude to 
 - **Endpoint: GET /get_fishing_locations**
 - This API endpoint retrieves fishing location details based on the specified time period or date range.
 - Query Parameters:
+
   - period (string) _(optional)_: Filtered by predefined periods:
     - "month": Locations from the last 30days.
     - "year": Locations from the current year.
@@ -91,25 +93,21 @@ The system provides an API that can be queried with a latitude and longitude to 
     ```
     /get_fishing_locations?period=month
     ```
-
   - Get locations for this year:
 
     ```
     /get_fishing_locations?period=year
     ```
-
   - Get locations for last year:
 
     ```
     /get_fishing_locations?period=last%20year
     ```
-
   - Get locations for a custom date range:
 
     ```
     /get_fishing_locations?start_date=2024-10-01&end_date=2024-12-01
     ```
-
 - Response:
 
   - Success:
@@ -139,7 +137,6 @@ The system provides an API that can be queried with a latitude and longitude to 
       ]
     }
     ```
-
   - Faliure:
 
     ```
@@ -157,3 +154,20 @@ The system provides an API that can be queried with a latitude and longitude to 
 ## Compatible versions
 
 ## Deployment
+
+* Make the Docker environment
+* Build the following command to build the service:
+
+  ```
+  docker build -t fishing-hotspots-api .
+  ```
+* Run the docker image
+
+  ```
+  docker run -d -p 8000:8000 fishing-hotspots-api # the port number might be change
+  ```
+* Check the status of the container
+
+  ```
+  docker ps
+  ```
