@@ -27,13 +27,13 @@ The system provides an API that can be queried with a latitude and longitude to 
 
 ### Save Fishing Location
 
-* **Endpoint: POST /save_fishing_location**
-* This API endpoint is used to save fishing hotspot data to the database.
-* Requested Parameteres:
-  * id (string): Vessel ID and Message ID separated  by a hyphen (-)
-  * l (string): Latitude and Longitude saparated by a hyphen (-)
-  * f (integer): Indicator (used to mark whether this is a fishing hotspot message)
-* Reqeusted Body Example:
+- **Endpoint: POST /save_fishing_location**
+- This API endpoint is used to save fishing hotspot data to the database.
+- Requested Parameteres:
+  - id (string): Vessel ID and Message ID separated by a hyphen (-)
+  - l (string): Latitude and Longitude saparated by a hyphen (-)
+  - f (integer): Indicator (used to mark whether this is a fishing hotspot message)
+- Reqeusted Body Example:
   ```
   {
     "id": "123-4567",
@@ -41,8 +41,9 @@ The system provides an API that can be queried with a latitude and longitude to 
     "f": 1
   }
   ```
-* Response:
-  * Success:
+- Response:
+
+  - Success:
 
     ```
     {
@@ -60,7 +61,8 @@ The system provides an API that can be queried with a latitude and longitude to 
       }
     }
     ```
-  * Failure (Duplicate Location):
+
+  - Failure (Duplicate Location):
 
     ```
     {
@@ -72,37 +74,85 @@ The system provides an API that can be queried with a latitude and longitude to 
 
 ### Get Fishing Locations
 
-* **Endpoint: GET /get_fishing_locations**
-* This API endpoint retrieves fishing location details based on the specified time period or date range.
-* Query Parameters:
-  * period (string) *(optional)*: Filtered by predefined periods:
-    * "month": Locations from the last 30days.
-    * "year": Locations from the current year.
-    * "last year": Locations from the previous year.
-  * start_date (string) *(optional)*: Custom start date in YYYY-MM-DD format.
-  * end_date (string) *(optional)*: Custom end date in YYYY-MM-DD format.
-* if period is provided, start_date and the end_date are ignored.
-* Query parameter Examples:
-  * Get location for the last month:
+- **Endpoint: GET /get_fishing_locations**
+- This API endpoint retrieves fishing location details based on the specified time period or date range.
+- Query Parameters:
+  - period (string) _(optional)_: Filtered by predefined periods:
+    - "month": Locations from the last 30days.
+    - "year": Locations from the current year.
+    - "last year": Locations from the previous year.
+  - start_date (string) _(optional)_: Custom start date in YYYY-MM-DD format.
+  - end_date (string) _(optional)_: Custom end date in YYYY-MM-DD format.
+- if period is provided, start_date and the end_date are ignored.
+- Query parameter Examples:
+
+  - Get locations for the last month:
 
     ```
     /get_fishing_locations?period=month
     ```
-  * Get location for this year:
+
+  - Get locations for this year:
 
     ```
     /get_fishing_locations?period=year
     ```
-  * Get location for last year:
+
+  - Get locations for last year:
 
     ```
     /get_fishing_locations?period=last%20year
     ```
-  * Get locations for a custom date range:
+
+  - Get locations for a custom date range:
 
     ```
     /get_fishing_locations?start_date=2024-10-01&end_date=2024-12-01
     ```
+
+- Response:
+
+  - Success:
+
+    ```
+    {
+      "status": "success",
+      "data": [
+        {
+          "vesselId": "123",
+          "messageId": "456",
+          "latitude": 12.2323,
+          "longitude": 34.23432,
+          "currentDateTime": "2024-11-01T12:00:00",
+          "status": "active",
+          "f": 1
+        },
+        {
+          "vesselId": "789",
+          "messageId": "012",
+          "latitude": 12.2330,
+          "longitude": 34.23450,
+          "currentDateTime": "2024-11-05T14:00:00",
+          "status": "active",
+          "f": 1
+        }
+      ]
+    }
+    ```
+
+  - Faliure:
+
+    ```
+    {
+      "status": "error",
+      "message": "An error occurred: <error_details>"
+    }
+    ```
+
+## Error Handling
+
+- **400 Bad Request:** Return when input data is invalid (e.g., incorrect format).
+- **500 Internal Server Error:** Returned for unexpected server-side issues.
 
 ## Compatible versions
 
