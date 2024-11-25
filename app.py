@@ -1,12 +1,12 @@
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from pymongo import MongoClient
-from datetime import datetime, timedelta
-import geopy.distance
+from datetime import datetime
 import os
 from dotenv import load_dotenv
+import math
 
-# Load environment variables from the .env file
+# Load environment variables
 load_dotenv()
 
 # MongoDB client setup
@@ -18,76 +18,86 @@ client = MongoClient(mongodb_url)
 db = client['aquasafe']
 fishing_locations = db['fishing_locations']
 
+# Get circle radius from .env
+radius_in_meters = float(os.getenv("LOCATION_RADIUS_METERS", 20))  # Default to 20 meters
+
 app = FastAPI()
 
-MAX_DISTANCE_THRESHOLD = float(os.getenv("MAX_DISTANCE_THRESHOLD", "50"))
-MAX_VISIT_THRESHOLD = int(os.getenv("MAX_VISIT_THRESHOLD", "10"))
+# Request model
+class FishingLocationRequest(BaseModel):
+    id: str  # Vessel ID and Message ID separated by "-"
+    l: str   # Latitude and Longitude separated by "-"
+    f: int   # Indicator (whether this is fishing hotspot incoming message)
 
-# Request model for input coordinates
-class LocationRequest(BaseModel):
-    latitude: float
-    longitude: float
 
-# Function to get the best fishing location based on fuel efficiency and visit count
-def get_best_fishing_location(current_latitude, current_longitude):
-    locations = fishing_locations.find({"is_active": True})
-    
-    nearby_locations = []
-    for location in locations:
-        distance = geopy.distance.distance(
-            (current_latitude, current_longitude),
-            (location['latitude'], location['longitude'])
-        ).km
-        if distance < MAX_DISTANCE_THRESHOLD and location['visit_count'] < MAX_VISIT_THRESHOLD:
-            nearby_locations.append((location, distance))
-    
-    # Sort locations by distance (for fuel efficiency) and visit count (for balance)
-    sorted_locations = sorted(nearby_locations, key=lambda x: x[1])
-    best_location = sorted_locations[0][0] if sorted_locations else None
-
-    return {
-        "latitude": best_location['latitude'],
-        "longitude": best_location['longitude']
-    } if best_location else None
-
-# Adaptive learning function to update fishing location data based on wait time
-def update_fishing_location(location_id, wait_time_minutes):
-    fishing_location = fishing_locations.find_one({"_id": location_id})
-    
-    if wait_time_minutes > 30:
-        new_avg_wait_time = (
-            fishing_location['average_wait_time'] + wait_time_minutes
-        ) / 2
-        fishing_locations.update_one(
-            {"_id": location_id},
-            {"$set": {"average_wait_time": new_avg_wait_time, "is_active": True}}
+# Utility to parse and validate input
+def parse_location_data(request: FishingLocationRequest):
+    try:
+        vessel_id, message_id = request.id.split("-")
+        latitude, longitude = map(float, request.l.split("-"))
+        # Limit precision to 5 decimal places
+        latitude = round(latitude, 5)
+        longitude = round(longitude, 5)
+    except ValueError:
+        raise HTTPException(
+            status_code=400, detail="Invalid format for 'id' or 'l'"
         )
-    deactivate_old_locations()
+    return vessel_id, message_id, latitude, longitude
 
-# Function to deactivate old locations not visited in the past 30 days
-def deactivate_old_locations():
-    cutoff_date = datetime.now() - timedelta(days=30)
-    fishing_locations.update_many(
-        {"last_visited": {"$lt": cutoff_date}},
-        {"$set": {"is_active": False}}
-    )
 
-# GET endpoint to provide the best fishing hotspot recommendation
-@app.get("/fishing_hotspots")
-async def fishing_hotspots(latitude: float = Query(...), longitude: float = Query(...)):
-    best_location = get_best_fishing_location(latitude, longitude)
-    
-    if best_location:
+# Utility to calculate distance using the Haversine formula
+def haversine(lat1, lon1, lat2, lon2):
+    R = 6371000  # Earth's radius in meters
+    phi1, phi2 = math.radians(lat1), math.radians(lat2)
+    delta_phi = math.radians(lat2 - lat1)
+    delta_lambda = math.radians(lon2 - lon1)
+    a = math.sin(delta_phi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda / 2) ** 2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return R * c
+
+
+# Function to check if the location is within the radius of any existing location
+def is_location_within_radius(latitude, longitude):
+    existing_locations = fishing_locations.find({"status": "active"})  # Check only active locations
+    for location in existing_locations:
+        db_lat = round(location["latitude"], 5)
+        db_lon = round(location["longitude"], 5)
+        distance = haversine(latitude, longitude, db_lat, db_lon)
+        if distance <= radius_in_meters:
+            return True
+    return False
+
+
+# POST endpoint to save fishing hotspot data
+@app.post("/save_fishing_location")
+async def save_fishing_location(request: FishingLocationRequest):
+    # Parse and validate input
+    vessel_id, message_id, latitude, longitude = parse_location_data(request)
+
+    # Check if the location is within the radius of existing locations
+    if is_location_within_radius(latitude, longitude):
         return {
-            "status": "success",
-            "best_location": best_location
+            "status": "failed",
+            "message": "Location already exists within the specified radius.",
+            "radius": radius_in_meters
         }
-    else:
-        raise HTTPException(status_code=404, detail="No suitable fishing location found")
 
+    # Prepare data for saving
+    current_time = datetime.now().isoformat()
+    data = {
+        "vesselId": vessel_id,
+        "messageId": message_id,
+        "latitude": latitude,
+        "longitude": longitude,
+        "currentDateTime": current_time,
+        "status": "active",  # Default status as active
+        "f": request.f       # Save the indicator as-is
+    }
 
-# To handle adaptive learning based on fishermen's wait time at a location
-@app.post("/update_location")
-async def update_location(location_id: str, wait_time_minutes: int):
-    update_fishing_location(location_id, wait_time_minutes)
-    return {"status": "updated"}
+    # Save to the database
+    result = fishing_locations.insert_one(data)
+
+    # Add the inserted ID as a string to the response
+    data["_id"] = str(result.inserted_id)
+
+    return {"status": "success", "message": "Fishing location saved successfully", "data": data}
