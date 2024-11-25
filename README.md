@@ -2,22 +2,22 @@
 
 ## Description
 
-This is a model that develops a fishing spot prediction system to help anglers identify optimal fishing locations. The model considers factors such as fuel efficiency, environmental sustainability, and adaptive learning from historical data to suggest productive fishing spots while balancing ecosystem impact.
+This is a logic that develops a fishing spot prediction system to help anglers identify optimal fishing locations. The logic considers factors such as fuel efficiency, environmental sustainability, and adaptive learning from historical data to suggest productive fishing spots while balancing ecosystem impact.
 
 ## Usage
 
-The system provides an API that can be queried with a latitude and longitude to receive recommendations on the best fishing locations. The model takes into account recent activity and visit patterns to distribute fishermen evenly and conserve fish populations. Additionally, the system learns over time, adjusting hotspots based on live fishing patterns.
+The system provides an API that can be queried with a latitude and longitude to receive recommendations on the best fishing locations. The logic takes into account recent activity and visit patterns to distribute fishermen evenly and conserve fish populations. Additionally, the system learns over time, adjusting hotspots based on live fishing patterns.
 
 ## Installation
 
 ### For macOs:
 
 1. Rename .example.env file into .env and fill the reqeusted configuration within the file
-1. Create python virtual environment `python3 -m venv venv`
-1. Active the virtual environment `source venv/bin/activate`
-1. Command to diactivate the virtual environment (if needed) `deactivate`
-1. Install all the dependencies `pip install -r requirements.txt`
-1. Start the server `uvicorn app:app --reload`
+2. Create python virtual environment `python3 -m venv venv`
+3. Active the virtual environment `source venv/bin/activate`
+4. Command to diactivate the virtual environment (if needed) `deactivate`
+5. Install all the dependencies `pip install -r requirements.txt`
+6. Start the server `uvicorn app:app --reload`
 
 ### Other commands:
 
@@ -25,42 +25,48 @@ The system provides an API that can be queried with a latitude and longitude to 
 
 ## API Integration
 
-1.  Get Best Fishing Location
-        - Endpoint: `/fishing_hotspots`
-        - Method: `GET`
-        - Query Parameters:
-          - `latitude` (float): Latitude of the current location.
-          - `longitude` (float): Longitude of the current location.
-        - Description: Returns the optimal fishing location based on fuel efficiency, visit count, and historical hotspot data.
-        - Example Request:
-          - `GET http://127.0.0.1:8000/fishing_hotspots?latitude=56.127788&longitude=12.310137`
-        - Example Response: - `{
-        "status": "success",
-        "best_location": {
-            "latitude": 56.130000,
-            "longitude": 12.315000
-        }
+### Save Fishing Location
 
-    }`
-
-2.  Update Location Data (Adaptive Learning)
-    - Endpoint: `/update_location`
-    - Method: `POST`
-    - Body:
-      - location_id (string): Unique identifier for the fishing location.
-      - wait_time_minutes (integer): Time (in minutes) that a fisherman waited at a location.
-    - Description: Updates the model with time spent at a location, helping it adapt to popular hotspots and deactivating unused spots.
-    - Example Request:
-      - ` POST http://127.0.0.1:8000/update_location
-{
-"location_id": "211477000-3",
-"wait_time_minutes": 35
-} `
-    - Example Response:
-        - `{
-    "status": "updated"
-}`
-
+* **Endpoint: POST /save_fishing_location**
+* This API endpoint is used to save fishing hotspot data to the database.
+* Requested Parameteres:
+  * id (string): Vessel ID and Message ID separated  by a hyphen (-)
+  * l (string): Latitude and Longitude saparated by a hyphen (-)
+  * f (integer): Indicator (used to mark whether this is a fishing hotspot message)
+* Reqeusted Body Example:
+  ```
+  {
+    "id": "123-4567",
+    "l": "12.2323-34.23432",
+    "f": 1
+  }
+  ```
+* Response:
+  * Success:
+    ```
+    {
+      "status": "success",
+      "message": "Fishing location saved successfully",
+      "data": {
+        "vesselId": "123",
+        "messageId": "4567",
+        "latitude": 12.2323,
+        "longitude": 34.23432,
+        "currentDateTime": "2024-11-25T15:30:00.123456",
+        "status": "active",
+        "f": 1,
+        "_id": "6521c7d7afdbf3e4d8a75f4a"
+      }
+    }
+    ```
+  * Failure (Duplicate Location):
+    ```
+    {
+      "status": "failed",
+      "message": "Location already exists within the specified radius.",
+      "radius": 20
+    }
+    ```
 
 ## Compatible versions
 
