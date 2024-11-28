@@ -31,15 +31,15 @@ The system provides an API that can be queried with a latitude and longitude to 
 - This API endpoint is used to save fishing hotspot data to the database.
 - Requested Parameteres:
 
-  - id (string): Vessel ID and Message ID separated by a hyphen (-)
-  - l (string): Latitude and Longitude saparated by a hyphen (-)
+  - id (string): Vessel ID and Message ID separated by a |
+  - l (string): Latitude and Longitude saparated by a hyphen |
   - f (integer): Indicator (used to mark whether this is a fishing hotspot message)
 - Reqeusted Body Example:
 
   ```
   {
-    "id": "123-4567",
-    "l": "12.2323-34.23432",
+    "id": "123|4567",
+    "l": "12.2323|34.23432",
     "f": 1
   }
   ```
@@ -83,8 +83,8 @@ The system provides an API that can be queried with a latitude and longitude to 
     - "month": Locations from the last 30days.
     - "year": Locations from the current year.
     - "last year": Locations from the previous year.
-  - start_date (string) _(optional)_: Custom start date in YYYY-MM-DD format.
-  - end_date (string) _(optional)_: Custom end date in YYYY-MM-DD format.
+  - start*date (string) *(optional)\_: Custom start date in YYYY-MM-DD format.
+  - end*date (string) *(optional)\_: Custom end date in YYYY-MM-DD format.
 - if period is provided, start_date and the end_date are ignored.
 - Query parameter Examples:
 
@@ -146,6 +146,128 @@ The system provides an API that can be queried with a latitude and longitude to 
     }
     ```
 
+### Link vessel with the hotspots
+
+- **Endpoint: POST /link_vessel_to_hotspot**
+- This API endpoint link the vessels with the hotspots. Once it linked there is a shedular function its check whether the linked vessel is active time to time. With if not active the status is filed will go to 0. That means that hotspot can be use another vessel.
+- Query Parameters:
+
+  - vessel_id: The vessel id that need to be allocated to the hotspot.
+  - hotspot_id: The id of thr hotspot that vessle going to be allocated.
+- Requested Body Example:
+
+  ```
+  {
+      "vessel_id": "Vessel123",
+      "hotspot_id": 1
+  }
+  ```
+- Response:
+
+  - Sucess:
+
+    ```
+    {
+        "status": "success",
+        "message": "Vessel linked to hotspot successfully",
+        "data": {
+            "vesselId": "Vessel123",
+            "hotspotId": 1,
+            "dateTime": "2024-11-28T13:40:24.289108",
+            "status": 1,
+            "_id": "6748257037990298c1c5d936"
+        }
+    }
+    ```
+  - Faliure:
+
+    ```
+    {
+        "status": "failed",
+        "message": "Vessel Vessel123 is already linked to hotspot 1 and is active."
+    }
+    ```
+
+### Suggest the latest hotspots
+
+- **Endpoint: GET /suggest_fishing_hotspots**
+- This API endpoint gives the currently avaialbe latest saved best fishing hotspots.
+- Response:
+  - Success:
+
+    ```
+    {
+        "status": "success",
+        "message": "Latest suggested fishing hotspots retrieved successfully.",
+        "data": [
+            {
+                "hotspotId": 2,
+                "latitude": 13.23,
+                "longitude": 34.23,
+                "currentDateTime": "2024-11-28T13:06:02.968787",
+                "vesselCount": 0,
+                "availableSlots": 5
+            },
+            {
+                "hotspotId": 1,
+                "latitude": 12.23,
+                "longitude": 34.23,
+                "currentDateTime": "2024-11-28T13:05:50.957204",
+                "vesselCount": 1,
+                "availableSlots": 4
+            }
+        ]
+    }
+    ```
+  - Faliure:
+
+    ```
+    {
+        "detail": "Not Found"
+    }
+    ```
+
+### Save vessel location
+
+* **Endpoint: POST /save_vessel_location**
+* This API endpoint is used to save the vessels locations time-to-time in the database
+* Reqested Parameters:
+
+  * id (string): Vessel ID and Message ID separated by a |
+  * l (string): Latitude and Longitude saparated by a |
+* Requested Body Example:
+
+  ```
+  {
+      "id": "123|0000",
+      "l": "80.12321|13.32432"
+  }
+  ```
+* Response:
+
+  * Success:
+
+    ```
+    {
+        "status": "success",
+        "message": "Vessel location saved successfully.",
+        "data": {
+            "vesselId": "123",
+            "dateTime": "2024-11-29T04:06:02.299424",
+            "lat": 80.12321,
+            "lng": 13.32432,
+            "_id": "6748f0523bbf7b66c434ef18"
+        }
+    }
+    ```
+  * Faliure (for wrong format: 001-0001):
+
+    ```
+    {
+        "detail": "Invalid format for 'id' or 'l'"
+    }
+    ```
+
 ## Error Handling
 
 - **400 Bad Request:** Return when input data is invalid (e.g., incorrect format).
@@ -155,18 +277,18 @@ The system provides an API that can be queried with a latitude and longitude to 
 
 ## Deployment
 
-* Make the Docker environment
-* Build the following command to build the service:
+- Make the Docker environment
+- Build the following command to build the service:
 
   ```
   docker build -t fishing-hotspots-api .
   ```
-* Run the docker image
+- Run the docker image
 
   ```
   docker run -d -p 8000:8000 fishing-hotspots-api # the port number might be change
   ```
-* Check the status of the container
+- Check the status of the container
 
   ```
   docker ps
