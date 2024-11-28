@@ -146,6 +146,48 @@ The system provides an API that can be queried with a latitude and longitude to 
     }
     ```
 
+### Link vessel with the hotspots
+
+* **Endpoint: POST /link_vessel_to_hotspot**
+* This API endpoint link the vessels with the hotspots. Once it linked there is a shedular function its check whether the linked vessel is active time to time. With if not active the status is filed will go to 0. That means that hotspot can be use another vessel.
+* Query Parameters:
+
+  * vessel_id: The vessel id that need to be allocated to the hotspot.
+  * hotspot_id: The id of thr hotspot that vessle going to be allocated.
+* Requested Body Example:
+
+  ```
+  {
+      "vessel_id": "Vessel123",
+      "hotspot_id": 1
+  }
+  ```
+* Response:
+
+  * Sucess:
+
+    ```
+    {
+        "status": "success",
+        "message": "Vessel linked to hotspot successfully",
+        "data": {
+            "vesselId": "Vessel123",
+            "hotspotId": 1,
+            "dateTime": "2024-11-28T13:40:24.289108",
+            "status": 1,
+            "_id": "6748257037990298c1c5d936"
+        }
+    }
+    ```
+  * Faliure:
+
+    ```
+    {
+        "status": "failed",
+        "message": "Vessel Vessel123 is already linked to hotspot 1 and is active."
+    }
+    ```
+
 ## Error Handling
 
 - **400 Bad Request:** Return when input data is invalid (e.g., incorrect format).
