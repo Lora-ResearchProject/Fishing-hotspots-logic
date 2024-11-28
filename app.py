@@ -167,7 +167,7 @@ async def get_fishing_locations(
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-  # Define a request model for the POST request
+# Define a request model for the POST request
 class LinkVesselHotspotRequest(BaseModel):
     vessel_id: str
     hotspot_id: int
@@ -187,6 +187,14 @@ async def link_vessel_to_hotspot(request: LinkVesselHotspotRequest):
                 status_code=404,
                 detail=f"hotspotId {hotspot_id} does not exist in fishing_hotspots_locations collection."
             )
+
+        # Check if the vessel is already linked to the hotspot with status = 1
+        active_link = hotspots_vessels.find_one({"vesselId": vessel_id, "hotspotId": hotspot_id, "status": 1})
+        if active_link:
+            return {
+                "status": "failed",
+                "message": f"Vessel {vessel_id} is already linked to hotspot {hotspot_id} and is active."
+            }
 
         # Prepare data for saving
         data = {
@@ -211,6 +219,7 @@ async def link_vessel_to_hotspot(request: LinkVesselHotspotRequest):
             status_code=500,
             detail=f"An unexpected error occurred: {str(e)}"
         )
+
     
 # Load max vessels per hotspot from .env
 max_vessels_per_hotspot = int(os.getenv("MAX_VESSELS_PER_HOTSPOT", 5))  # Default to 5 if not set
