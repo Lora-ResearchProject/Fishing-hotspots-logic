@@ -1,5 +1,5 @@
-from fastapi import APIRouter
-from datetime import datetime
+from fastapi import APIRouter, HTTPException, Query
+from datetime import datetime, timedelta
 import os
 from ..database import fishing_locations
 from ..models import FishingLocationRequest
@@ -37,3 +37,48 @@ async def save_fishing_location(request: FishingLocationRequest):
     data["_id"] = str(result.inserted_id)
 
     return {"status": "success", "message": "Fishing location saved successfully", "data": data}
+
+# GET endpoint to retrieve fishing locations by period
+@router.get("/get_fishing_locations")
+async def get_fishing_locations(
+    period: str = Query(None, description="Filter by 'month', 'year', 'last year', or a date range"),
+    start_date: str = Query(None, description="Start date in YYYY-MM-DD format (optional if period is given)"),
+    end_date: str = Query(None, description="End date in YYYY-MM-DD format (optional if period is given)")
+):
+    try:
+        # Determine the date range based on period
+        now = datetime.now()
+        if period == "month":
+            start_date = (now - timedelta(days=30)).strftime("%Y-%m-%d")
+            end_date = now.strftime("%Y-%m-%d")
+        elif period == "year":
+            start_date = datetime(now.year, 1, 1).strftime("%Y-%m-%d")
+            end_date = datetime(now.year, 12, 31).strftime("%Y-%m-%d")
+        elif period == "last year":
+            start_date = datetime(now.year - 1, 1, 1).strftime("%Y-%m-%d")
+            end_date = datetime(now.year - 1, 12, 31).strftime("%Y-%m-%d")
+        elif start_date and end_date:
+            # Use custom date range
+            pass
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid query parameters. Specify a valid period or a start and end date."
+            )
+
+        # Convert start_date and end_date to datetime objects
+        start_datetime = datetime.strptime(start_date, "%Y-%m-%d")
+        end_datetime = datetime.strptime(end_date, "%Y-%m-%d")
+
+        # Query the database for locations in the specified date range
+        query = {
+            "currentDateTime": {
+                "$gte": start_datetime.isoformat(),
+                "$lte": end_datetime.isoformat()
+            }
+        }
+        results = list(fishing_locations.find(query, {"_id": 0}))
+
+        return {"status": "success", "data": results}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
