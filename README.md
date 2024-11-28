@@ -31,20 +31,18 @@ The system provides an API that can be queried with a latitude and longitude to 
 - This API endpoint is used to save fishing hotspot data to the database.
 - Requested Parameteres:
 
-  - id (string): Vessel ID and Message ID separated by a hyphen (-)
-  - l (string): Latitude and Longitude saparated by a hyphen (-)
+  - id (string): Vessel ID and Message ID separated by a |
+  - l (string): Latitude and Longitude saparated by a hyphen |
   - f (integer): Indicator (used to mark whether this is a fishing hotspot message)
-
 - Reqeusted Body Example:
 
   ```
   {
-    "id": "123-4567",
-    "l": "12.2323-34.23432",
+    "id": "123|4567",
+    "l": "12.2323|34.23432",
     "f": 1
   }
   ```
-
 - Response:
 
   - Success:
@@ -65,7 +63,6 @@ The system provides an API that can be queried with a latitude and longitude to 
       }
     }
     ```
-
   - Failure (Duplicate Location):
 
     ```
@@ -88,7 +85,6 @@ The system provides an API that can be queried with a latitude and longitude to 
     - "last year": Locations from the previous year.
   - start*date (string) *(optional)\_: Custom start date in YYYY-MM-DD format.
   - end*date (string) *(optional)\_: Custom end date in YYYY-MM-DD format.
-
 - if period is provided, start_date and the end_date are ignored.
 - Query parameter Examples:
 
@@ -97,25 +93,21 @@ The system provides an API that can be queried with a latitude and longitude to 
     ```
     /get_fishing_locations?period=month
     ```
-
   - Get locations for this year:
 
     ```
     /get_fishing_locations?period=year
     ```
-
   - Get locations for last year:
 
     ```
     /get_fishing_locations?period=last%20year
     ```
-
   - Get locations for a custom date range:
 
     ```
     /get_fishing_locations?start_date=2024-10-01&end_date=2024-12-01
     ```
-
 - Response:
 
   - Success:
@@ -145,7 +137,6 @@ The system provides an API that can be queried with a latitude and longitude to 
       ]
     }
     ```
-
   - Faliure:
 
     ```
@@ -163,7 +154,6 @@ The system provides an API that can be queried with a latitude and longitude to 
 
   - vessel_id: The vessel id that need to be allocated to the hotspot.
   - hotspot_id: The id of thr hotspot that vessle going to be allocated.
-
 - Requested Body Example:
 
   ```
@@ -172,7 +162,6 @@ The system provides an API that can be queried with a latitude and longitude to 
       "hotspot_id": 1
   }
   ```
-
 - Response:
 
   - Sucess:
@@ -190,7 +179,6 @@ The system provides an API that can be queried with a latitude and longitude to 
         }
     }
     ```
-
   - Faliure:
 
     ```
@@ -205,7 +193,6 @@ The system provides an API that can be queried with a latitude and longitude to 
 - **Endpoint: GET /suggest_fishing_hotspots**
 - This API endpoint gives the currently avaialbe latest saved best fishing hotspots.
 - Response:
-
   - Success:
 
     ```
@@ -232,12 +219,52 @@ The system provides an API that can be queried with a latitude and longitude to 
         ]
     }
     ```
-
   - Faliure:
 
     ```
     {
         "detail": "Not Found"
+    }
+    ```
+
+### Save vessel location
+
+* **Endpoint: POST /save_vessel_location**
+* This API endpoint is used to save the vessels locations time-to-time in the database
+* Reqested Parameters:
+
+  * id (string): Vessel ID and Message ID separated by a |
+  * l (string): Latitude and Longitude saparated by a |
+* Requested Body Example:
+
+  ```
+  {
+      "id": "123|0000",
+      "l": "80.12321|13.32432"
+  }
+  ```
+* Response:
+
+  * Success:
+
+    ```
+    {
+        "status": "success",
+        "message": "Vessel location saved successfully.",
+        "data": {
+            "vesselId": "123",
+            "dateTime": "2024-11-29T04:06:02.299424",
+            "lat": 80.12321,
+            "lng": 13.32432,
+            "_id": "6748f0523bbf7b66c434ef18"
+        }
+    }
+    ```
+  * Faliure (for wrong format: 001-0001):
+
+    ```
+    {
+        "detail": "Invalid format for 'id' or 'l'"
     }
     ```
 
@@ -256,13 +283,11 @@ The system provides an API that can be queried with a latitude and longitude to 
   ```
   docker build -t fishing-hotspots-api .
   ```
-
 - Run the docker image
 
   ```
   docker run -d -p 8000:8000 fishing-hotspots-api # the port number might be change
   ```
-
 - Check the status of the container
 
   ```
