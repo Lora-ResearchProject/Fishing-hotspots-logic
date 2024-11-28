@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
 import math
+from apscheduler.schedulers.background import BackgroundScheduler
 
 # Load environment variables
 load_dotenv()
@@ -17,6 +18,7 @@ if not mongodb_url:
 client = MongoClient(mongodb_url)
 db = client['aquasafe']
 fishing_locations = db['fishing_hotspots_locations']
+hotspots_vessels = db['hotspots_vessels']
 
 # Get circle radius from .env
 radius_in_meters = float(os.getenv("LOCATION_RADIUS_METERS", 20))  # Default to 20 meters
@@ -195,7 +197,6 @@ async def link_vessel_to_hotspot(request: LinkVesselHotspotRequest):
         }
 
         # Insert data into the hotspots_vessels collection
-        hotspots_vessels = db['hotspots_vessels']
         result = hotspots_vessels.insert_one(data)
 
         # Add the inserted ID as a string to the response
@@ -258,3 +259,53 @@ async def suggest_fishing_hotspots():
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
+
+
+ # Scheduler setup
+scheduler = BackgroundScheduler()
+
+@app.on_event("startup")
+def start_scheduler():
+    """Ensure the scheduler starts when the app starts."""
+    scheduler.start()
+
+@app.on_event("shutdown")
+def shutdown_scheduler():
+    """Shut down the scheduler gracefully."""
+    scheduler.shutdown()   
+
+# Function to check vessel activity and update status
+def check_vessel_activity():
+    try:
+        # Define the time range (last 15 minutes)
+        now = datetime.now()
+        fifteen_minutes_ago = now - timedelta(minutes=15)
+
+        # Get all vessels with status = 1 in hotspots_vessels
+        active_vessels = hotspots_vessels.find({"status": 1})
+
+        # Check activity for each active vessel
+        for vessel in active_vessels:
+            vessel_id = vessel["vesselId"]
+            hotspot_id = vessel["hotspotId"]
+
+            # Check if the vessel has any activity in the last 15 minutes
+            activity_count = db['vessels_locations'].count_documents({
+                "vesselId": vessel_id,
+                "hotspotId": hotspot_id,
+                "timestamp": {"$gte": fifteen_minutes_ago}
+            })
+
+            # If no activity is found, update status to 0
+            if activity_count == 0:
+                hotspots_vessels.update_one(
+                    {"_id": vessel["_id"]},
+                    {"$set": {"status": 0}}
+                )
+                print(f"Updated vessel {vessel_id} at hotspot {hotspot_id} to inactive.")
+
+    except Exception as e:
+        print(f"An error occurred in check_vessel_activity: {e}")
+
+# Schedule the function to run every 5 minutes
+scheduler.add_job(check_vessel_activity, "interval", minutes=1)
