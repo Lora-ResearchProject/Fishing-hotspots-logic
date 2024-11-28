@@ -188,6 +188,46 @@ The system provides an API that can be queried with a latitude and longitude to 
     }
     ```
 
+### Suggest the latest hotspots
+
+* **Endpoint: GET /suggest_fishing_hotspots**
+* This API endpoint gives the currently avaialbe latest saved best fishing hotspots.
+* Response:
+  *
+  * Success:
+
+    ```
+    {
+        "status": "success",
+        "message": "Latest suggested fishing hotspots retrieved successfully.",
+        "data": [
+            {
+                "hotspotId": 2,
+                "latitude": 13.23,
+                "longitude": 34.23,
+                "currentDateTime": "2024-11-28T13:06:02.968787",
+                "vesselCount": 0,
+                "availableSlots": 5
+            },
+            {
+                "hotspotId": 1,
+                "latitude": 12.23,
+                "longitude": 34.23,
+                "currentDateTime": "2024-11-28T13:05:50.957204",
+                "vesselCount": 1,
+                "availableSlots": 4
+            }
+        ]
+    }
+    ```
+  * Faliure:
+
+    ```
+    {
+        "detail": "Not Found"
+    }
+    ```
+
 ## Error Handling
 
 - **400 Bad Request:** Return when input data is invalid (e.g., incorrect format).
