@@ -16,7 +16,7 @@ if not mongodb_url:
 
 client = MongoClient(mongodb_url)
 db = client['aquasafe']
-fishing_locations = db['fishing_locations']
+fishing_locations = db['fishing_hotspots_locations']
 
 # Get circle radius from .env
 radius_in_meters = float(os.getenv("LOCATION_RADIUS_METERS", 20))  # Default to 20 meters
@@ -68,6 +68,20 @@ def is_location_within_radius(latitude, longitude):
     return False
 
 
+# Utility to determine the next hotspotId
+def get_next_hotspot_id():
+    # Fetch the document with the highest hotspotId
+    last_hotspot = fishing_locations.find_one(
+        {}, 
+        sort=[("hotspotId", -1)],  # Sort by hotspotId in descending order
+        projection={"hotspotId": 1}  # Only retrieve hotspotId
+    )
+    # If no documents exist, start with 1
+    if not last_hotspot or "hotspotId" not in last_hotspot:
+        return 1
+    # Increment the last hotspotId by 1
+    return last_hotspot["hotspotId"] + 1
+
 # POST endpoint to save fishing hotspot data
 @app.post("/save_fishing_location")
 async def save_fishing_location(request: FishingLocationRequest):
@@ -84,7 +98,9 @@ async def save_fishing_location(request: FishingLocationRequest):
 
     # Prepare data for saving
     current_time = datetime.now().isoformat()
+    hotspot_id = get_next_hotspot_id()  # Get the next hotspotId
     data = {
+        "hotspotId": hotspot_id,  # Assign the new hotspotId
         "vesselId": vessel_id,
         "messageId": message_id,
         "latitude": latitude,
