@@ -163,3 +163,50 @@ async def get_fishing_locations(
         return {"status": "success", "data": results}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+  # Define a request model for the POST request
+class LinkVesselHotspotRequest(BaseModel):
+    vessel_id: str
+    hotspot_id: int
+
+# POST endpoint to link vesselId with hotspotId
+@app.post("/link_vessel_to_hotspot")
+async def link_vessel_to_hotspot(request: LinkVesselHotspotRequest):
+    try:
+        # Extract parameters from the request body
+        vessel_id = request.vessel_id
+        hotspot_id = request.hotspot_id
+
+        # Check if the hotspotId exists in the fishing_hotspots_locations collection
+        hotspot_exists = fishing_locations.find_one({"hotspotId": hotspot_id})
+        if not hotspot_exists:
+            raise HTTPException(
+                status_code=404,
+                detail=f"hotspotId {hotspot_id} does not exist in fishing_hotspots_locations collection."
+            )
+
+        # Prepare data for saving
+        data = {
+            "vesselId": vessel_id,
+            "hotspotId": hotspot_id,
+            "dateTime": datetime.now().isoformat(),  # Current timestamp
+            "status": 1  # Default status as 1
+        }
+
+        # Insert data into the hotspots_vessels collection
+        hotspots_vessels = db['hotspots_vessels']
+        result = hotspots_vessels.insert_one(data)
+
+        # Add the inserted ID as a string to the response
+        data["_id"] = str(result.inserted_id)
+
+        return {"status": "success", "message": "Vessel linked to hotspot successfully", "data": data}
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"An unexpected error occurred: {str(e)}"
+        )
