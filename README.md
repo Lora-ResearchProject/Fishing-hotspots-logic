@@ -34,6 +34,7 @@ The system provides an API that can be queried with a latitude and longitude to 
   - id (string): Vessel ID and Message ID separated by a hyphen (-)
   - l (string): Latitude and Longitude saparated by a hyphen (-)
   - f (integer): Indicator (used to mark whether this is a fishing hotspot message)
+
 - Reqeusted Body Example:
 
   ```
@@ -43,6 +44,7 @@ The system provides an API that can be queried with a latitude and longitude to 
     "f": 1
   }
   ```
+
 - Response:
 
   - Success:
@@ -63,6 +65,7 @@ The system provides an API that can be queried with a latitude and longitude to 
       }
     }
     ```
+
   - Failure (Duplicate Location):
 
     ```
@@ -83,8 +86,9 @@ The system provides an API that can be queried with a latitude and longitude to 
     - "month": Locations from the last 30days.
     - "year": Locations from the current year.
     - "last year": Locations from the previous year.
-  - start_date (string) _(optional)_: Custom start date in YYYY-MM-DD format.
-  - end_date (string) _(optional)_: Custom end date in YYYY-MM-DD format.
+  - start*date (string) *(optional)\_: Custom start date in YYYY-MM-DD format.
+  - end*date (string) *(optional)\_: Custom end date in YYYY-MM-DD format.
+
 - if period is provided, start_date and the end_date are ignored.
 - Query parameter Examples:
 
@@ -93,21 +97,25 @@ The system provides an API that can be queried with a latitude and longitude to 
     ```
     /get_fishing_locations?period=month
     ```
+
   - Get locations for this year:
 
     ```
     /get_fishing_locations?period=year
     ```
+
   - Get locations for last year:
 
     ```
     /get_fishing_locations?period=last%20year
     ```
+
   - Get locations for a custom date range:
 
     ```
     /get_fishing_locations?start_date=2024-10-01&end_date=2024-12-01
     ```
+
 - Response:
 
   - Success:
@@ -137,6 +145,7 @@ The system provides an API that can be queried with a latitude and longitude to 
       ]
     }
     ```
+
   - Faliure:
 
     ```
@@ -148,13 +157,14 @@ The system provides an API that can be queried with a latitude and longitude to 
 
 ### Link vessel with the hotspots
 
-* **Endpoint: POST /link_vessel_to_hotspot**
-* This API endpoint link the vessels with the hotspots. Once it linked there is a shedular function its check whether the linked vessel is active time to time. With if not active the status is filed will go to 0. That means that hotspot can be use another vessel.
-* Query Parameters:
+- **Endpoint: POST /link_vessel_to_hotspot**
+- This API endpoint link the vessels with the hotspots. Once it linked there is a shedular function its check whether the linked vessel is active time to time. With if not active the status is filed will go to 0. That means that hotspot can be use another vessel.
+- Query Parameters:
 
-  * vessel_id: The vessel id that need to be allocated to the hotspot.
-  * hotspot_id: The id of thr hotspot that vessle going to be allocated.
-* Requested Body Example:
+  - vessel_id: The vessel id that need to be allocated to the hotspot.
+  - hotspot_id: The id of thr hotspot that vessle going to be allocated.
+
+- Requested Body Example:
 
   ```
   {
@@ -162,9 +172,10 @@ The system provides an API that can be queried with a latitude and longitude to 
       "hotspot_id": 1
   }
   ```
-* Response:
 
-  * Sucess:
+- Response:
+
+  - Sucess:
 
     ```
     {
@@ -179,7 +190,8 @@ The system provides an API that can be queried with a latitude and longitude to 
         }
     }
     ```
-  * Faliure:
+
+  - Faliure:
 
     ```
     {
@@ -190,11 +202,11 @@ The system provides an API that can be queried with a latitude and longitude to 
 
 ### Suggest the latest hotspots
 
-* **Endpoint: GET /suggest_fishing_hotspots**
-* This API endpoint gives the currently avaialbe latest saved best fishing hotspots.
-* Response:
-  *
-  * Success:
+- **Endpoint: GET /suggest_fishing_hotspots**
+- This API endpoint gives the currently avaialbe latest saved best fishing hotspots.
+- Response:
+
+  - Success:
 
     ```
     {
@@ -220,7 +232,8 @@ The system provides an API that can be queried with a latitude and longitude to 
         ]
     }
     ```
-  * Faliure:
+
+  - Faliure:
 
     ```
     {
@@ -237,18 +250,20 @@ The system provides an API that can be queried with a latitude and longitude to 
 
 ## Deployment
 
-* Make the Docker environment
-* Build the following command to build the service:
+- Make the Docker environment
+- Build the following command to build the service:
 
   ```
   docker build -t fishing-hotspots-api .
   ```
-* Run the docker image
+
+- Run the docker image
 
   ```
   docker run -d -p 8000:8000 fishing-hotspots-api # the port number might be change
   ```
-* Check the status of the container
+
+- Check the status of the container
 
   ```
   docker ps
