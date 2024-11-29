@@ -46,7 +46,7 @@ async def link_vessel_to_hotspot(request: LinkVesselHotspotRequest):
             status_code=500, detail=f"An unexpected error occurred: {str(e)}"
         )
     
-    
+
 @router.post("/save_vessel_location")
 async def save_vessel_location(request: VesselLocationRequest):
     """
@@ -79,6 +79,27 @@ async def save_vessel_location(request: VesselLocationRequest):
 
     except HTTPException as e:
         raise e
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"An unexpected error occurred: {str(e)}"
+        )
+
+@router.get("/get_all_vessel_locations")
+async def get_all_vessel_locations():
+    """
+    Retrieve all vessel locations from the vessels_locations collection.
+    """
+    try:
+        # Retrieve all documents from the collection
+        vessel_locations = list(vessels_locations.find())
+
+        # Convert ObjectId to string for each document
+        for location in vessel_locations:
+            location["_id"] = str(location["_id"])
+
+        # Return the result
+        return {"status": "success", "data": vessel_locations}
+
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"An unexpected error occurred: {str(e)}"
