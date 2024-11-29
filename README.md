@@ -73,7 +73,7 @@ The system provides an API that can be queried with a latitude and longitude to 
     }
     ```
 
-### Get Fishing Locations
+### Get Fishing Hotsposts Locations
 
 - **Endpoint: GET /get_fishing_locations**
 - This API endpoint retrieves fishing location details based on the specified time period or date range.
@@ -265,6 +265,50 @@ The system provides an API that can be queried with a latitude and longitude to 
     ```
     {
         "detail": "Invalid format for 'id' or 'l'"
+    }
+    ```
+
+### Get Vessels locations
+
+* **Endpoint: GET /get_all_vessels_locations**
+* This API endpoint retrive all the vesses location from the database.
+* Response:
+  *
+  * Success:
+
+    ```
+    {
+        "status": "success",
+        "data": [
+            {
+                "_id": "6748f00e4ba3181dcffb312c",
+                "vesselId": "123",
+                "dateTime": "2024-11-29T04:04:54.637896",
+                "lat": 80.12321,
+                "lng": 13.32432
+            },
+            {
+                "_id": "6748f031f57d89b33452a90d",
+                "vesselId": "123",
+                "dateTime": "2024-11-29T04:05:29.290886",
+                "lat": 80.12321,
+                "lng": 13.32432
+            },
+            {
+                "_id": "6748f0523bbf7b66c434ef18",
+                "vesselId": "123",
+                "dateTime": "2024-11-29T04:06:02.299424",
+                "lat": 80.12321,
+                "lng": 13.32432
+            }
+        ]
+    }
+    ```
+  * Faliure:
+
+    ```
+    {
+        "detail": "Not Found"
     }
     ```
 
