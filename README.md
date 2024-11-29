@@ -268,7 +268,7 @@ The system provides an API that can be queried with a latitude and longitude to 
     }
     ```
 
-### Get Fishing locations
+### Get Vessels locations
 
 * **Endpoint: GET /get_all_vessels_locations**
 * This API endpoint retrive all the vesses location from the database.
