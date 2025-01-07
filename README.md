@@ -341,3 +341,7 @@ The system provides an API that can be queried with a latitude and longitude to 
   ```
   docker ps
   ```
+
+## Current Deployment
+
+`http://159.223.194.167:9002/`
