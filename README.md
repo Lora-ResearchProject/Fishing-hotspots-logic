@@ -326,6 +326,7 @@ The system provides an API that can be queried with a latitude and longitude to 
 ## Deployment
 
 - Make the Docker environment
+- Clone the repository
 - Build the following command to build the service:
 
   ```
@@ -334,7 +335,7 @@ The system provides an API that can be queried with a latitude and longitude to 
 - Run the docker image
 
   ```
-  docker run -d -p 8000:8000 fishing-hotspots-api # the port number might be change
+  docker run -d -p 9002:9002 fishing-hotspots-api # the port number might be change
   ```
 - Check the status of the container
 
