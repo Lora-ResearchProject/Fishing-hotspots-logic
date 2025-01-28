@@ -34,7 +34,7 @@ cd "$REPO_DIR" || { echo "Failed to change directory" >> "$LOGFILE"; exit 1; }
 
 # Run the container from the built image
 {
-    docker run -d --name "$CONTAINER_NAME" "$IMAGE_NAME"
+    docker run -d -p 9002:9002 --name "$CONTAINER_NAME" "$IMAGE_NAME"
 } >> "$LOGFILE" 2>&1 || { echo "Failed to start the Docker container" >> "$LOGFILE"; exit 1; }
 
 # Log the completion of the deployment
