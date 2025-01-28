@@ -1,0 +1,19 @@
+[
+  {
+    "id": "github-webhook",
+    "execute-command": "/root/research/Fishing-hotspots-logic/deploy.sh",
+    "command-working-directory": "/root/research/Fishing-hotspots-logic/",
+    "response-message": "FishAPI - Deployment initiated",
+    "trigger-rule": {
+      "match": {
+        "type": "value",
+        "secret": "aqure-secret",
+        "parameter": {
+          "source": "header",
+          "name": "X-GitHub-Event"
+        },
+        "value": "push"
+      }
+    }
+  }
+]
