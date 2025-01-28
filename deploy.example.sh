@@ -3,7 +3,9 @@
 # Define variables
 LOGFILE="$(pwd)/deploy.log"
 REPO_DIR="$(pwd)"  # The repository directory is the current working directory
-DOCKER_COMPOSE_FILE="docker-compose.yaml"
+DOCKERFILE="Dockerfile"
+IMAGE_NAME="fishing-hotspots-api"
+CONTAINER_NAME="fishing-hotspots-api-container"
 
 # Log the start of the deployment
 echo "Deployment started at $(date)" >> "$LOGFILE"
@@ -20,13 +22,20 @@ cd "$REPO_DIR" || { echo "Failed to change directory" >> "$LOGFILE"; exit 1; }
 
 # Stop and remove existing containers and project-specific images
 {
-    docker compose down --rmi all
+    docker stop "$CONTAINER_NAME" || true
+    docker rm "$CONTAINER_NAME" || true
+    docker rmi "$IMAGE_NAME" || true
 } >> "$LOGFILE" 2>&1 || { echo "Failed to stop and remove containers and images" >> "$LOGFILE"; exit 1; }
 
-# Build and start the containers using Docker Compose
+# Build the image using the Dockerfile
 {
-    docker compose -f "$DOCKER_COMPOSE_FILE" up --build -d
-} >> "$LOGFILE" 2>&1 || { echo "Failed to build and start containers" >> "$LOGFILE"; exit 1; }
+    docker build -t "$IMAGE_NAME" -f "$DOCKERFILE" .
+} >> "$LOGFILE" 2>&1 || { echo "Failed to build the Docker image" >> "$LOGFILE"; exit 1; }
+
+# Run the container from the built image
+{
+    docker run -d --name "$CONTAINER_NAME" "$IMAGE_NAME"
+} >> "$LOGFILE" 2>&1 || { echo "Failed to start the Docker container" >> "$LOGFILE"; exit 1; }
 
 # Log the completion of the deployment
 echo "Deployment completed at $(date)" >> "$LOGFILE"
