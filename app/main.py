@@ -31,5 +31,5 @@ def check_vessel_activity():
 @app.exception_handler(404)
 async def custom_404_handler(request: Request, exc):
     if request.method == "GET":
-        return JSONResponse(content={"message": "Sorry!, Please make a valid Request! test 3"}, status_code=404)
+        return JSONResponse(content={"message": "Sorry!, Please make a valid Request! test 4"}, status_code=404)
     return JSONResponse(content={"message": "Not Found"}, status_code=404)
