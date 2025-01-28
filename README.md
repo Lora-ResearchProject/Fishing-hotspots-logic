@@ -21,7 +21,7 @@ The system provides an API that can be queried with a latitude and longitude to 
 3. Active the virtual environment `source venv/bin/activate`
 4. Command to diactivate the virtual environment (if needed) `deactivate`
 5. Install all the dependencies `pip install -r requirements.txt`
-6. Start the server `uvicorn app:app --reload`
+6. Start the server `uvicorn app.main:app --reload`
 
 ### Other commands:
 
