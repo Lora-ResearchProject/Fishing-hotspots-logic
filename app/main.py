@@ -42,4 +42,4 @@ def check_vessel_activity():
 async def custom_404_handler(request: Request, exc):
     if request.method == "GET":
         return JSONResponse(content={"message": "Sorry!, Please make a valid Request!"}, status_code=404)
-    return JSONResponse(content={"message": "Not Found - check 1"}, status_code=404)
+    return JSONResponse(content={"message": "Not Found"}, status_code=404)
