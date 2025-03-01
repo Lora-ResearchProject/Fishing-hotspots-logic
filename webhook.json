@@ -5,15 +5,29 @@
     "command-working-directory": "/root/research/Fishing-hotspots-logic/",
     "response-message": "FishAPI - Deployment initiated",
     "trigger-rule": {
-      "match": {
-        "type": "value",
-        "secret": "aqure-secret",
-        "parameter": {
-          "source": "header",
-          "name": "X-GitHub-Event"
+      "and": [
+        {
+          "match": {
+            "type": "value",
+            "secret": "aqure-secret",
+            "parameter": {
+              "source": "header",
+              "name": "X-GitHub-Event"
+            },
+            "value": "push"
+          }
         },
-        "value": "push"
-      }
+        {
+          "match": {
+            "type": "value",
+            "parameter": {
+              "source": "payload",
+              "name": "ref"
+            },
+            "value": "refs/heads/main"
+          }
+        }
+      ]
     }
   }
 ]
