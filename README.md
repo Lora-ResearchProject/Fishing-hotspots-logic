@@ -337,7 +337,7 @@ The system provides an API that can be queried with a latitude and longitude to 
   - The port number might be change
 
   ```
-  docker run -d -p 9002:9002 fishing-hotspots-api
+  docker run -d -p 9002:9002 --name fishing-hotspots-api-container fishing-hotspots-api
   ```
 - Check the status of the container
 
