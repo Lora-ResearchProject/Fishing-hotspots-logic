@@ -54,7 +54,7 @@ async def save_vessel_location(request: VesselLocationRequest):
     """
     try:
         # Parse the request to extract vessel ID and location
-        vessel_id, message_id, latitude, longitude = parse_location_data(request)
+        vessel_id, latitude, longitude = parse_location_data(request)
 
         # Prepare the data to be saved
         data = {
