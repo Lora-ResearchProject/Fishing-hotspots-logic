@@ -3,7 +3,7 @@ import math
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta
-from .database import hotspots_vessels, vessels_locations
+from .database import hotspots_vessels, vessels_locations, fishing_locations
 
 # Create the scheduler instance
 scheduler = BackgroundScheduler(timezone="UTC") 
@@ -133,3 +133,60 @@ def scan_fishing_activity():
 
 # Run this job every 1 minutes (adjust as needed)
 scheduler.add_job(scan_fishing_activity, "interval", minutes=1)
+
+# ------------------------------------------------------------
+# Job 3  – remove the unused hotspots trigger -----------------
+
+UNUSED_HOTSPOT_DAYS = int(os.getenv("UNUSED_HOTSPOT_DAYS", "3"))
+CHECK_INTERVAL_MIN = UNUSED_HOTSPOT_DAYS * 24 * 60
+
+
+def deactivate_unused_hotspots():
+    """
+    Every N days:
+    • Look back N days in `hotspots_vessels`
+    • Collect hotspotIds that *have* been used in that window
+    • Any hotspot still marked active in `fishing_locations`
+      but *not* in that list → set status to 'inactive'.
+    """
+    try:
+        now_utc   = datetime.utcnow()
+        cutoff_iso = (now_utc - timedelta(days=UNUSED_HOTSPOT_DAYS)).isoformat()
+
+        # hotspotIds used in the look-back window
+        recent_hotspots = hotspots_vessels.distinct(
+            "hotspotId",
+            {"dateTime": {"$gte": cutoff_iso}}
+        )
+        recent_set = set(recent_hotspots)
+
+        # All hotspots still flagged active
+        unused_cursor = fishing_locations.find({
+            "status": "active",
+            "hotspotId": {"$nin": list(recent_set)}
+        })
+
+        changed = 0
+        for doc in unused_cursor:
+            fishing_locations.update_one(
+                {"_id": doc["_id"]},
+                {"$set": {"status": "inactive",
+                          "inactivatedDateTime": now_utc.isoformat()}}
+            )
+            changed += 1
+            print(f"[{now_utc.isoformat()}] Hotspot {doc['hotspotId']} set inactive.")
+
+        print(f"[{now_utc.isoformat()}] deactivate_unused_hotspots finished – "
+              f"{changed} hotspot(s) updated.")
+
+    except Exception as e:
+        print(f"[Scheduler] deactivate_unused_hotspots error: {e}")
+
+
+# Register the job (interval = N days)
+scheduler.add_job(
+    deactivate_unused_hotspots,
+    "interval",
+    minutes=CHECK_INTERVAL_MIN,
+    id="deactivate_unused_hotspots"
+)
