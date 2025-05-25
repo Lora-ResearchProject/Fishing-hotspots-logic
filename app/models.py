@@ -9,6 +9,9 @@ class LinkVesselHotspotRequest(BaseModel):
     vessel_id: str
     hotspot_id: int
 
+class UnlinkVesselHotspotRequest(BaseModel):
+    vessel_id: str
+
 class VesselLocationRequest(BaseModel):
     id: str  # Vessel ID and Message ID separated by "|"
     l: str   # Latitude and Longitude separated by "|"
