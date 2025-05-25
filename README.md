@@ -183,6 +183,7 @@ The system provides an API that can be queried with a latitude and longitude to 
         }
     }
     ```
+  -
   - Faliure:
 
     ```
@@ -191,6 +192,43 @@ The system provides an API that can be queried with a latitude and longitude to 
         "message": "Vessel Vessel123 is already linked to hotspot 1 and is active."
     }
     ```
+
+
+### Un-link vessel from any active hotspot(s)
+
+* **Endpoint: PATCH `/unlink_vessel_to_hotspot`**
+* This endpoint removes (sets `status = 0`) every *active* link between the given vessel and any hotspot.
+  If the vessel is already free (no active links), the call returns a *failed* status instead of silently succeeding.
+* **Body parameters** (JSON):
+  * `vessel_id` – **string** – ID of the vessel whose active hotspot links should be cleared.
+* **Request body example**
+  ```json
+  {
+    "vessel_id": "Vessel123"
+  }
+  ```
+* **Responses**
+  * **Success** – at least one active link was found and deactivated
+    ```json
+    {
+      "status": "success",
+      "message": "1 hotspot link(s) unlinked for vessel Vessel123."
+    }
+    ```
+  * **Failure** – no active links exist for that vessel
+    ```json
+    {
+      "status": "failed",
+      "message": "No active hotspot links found for vessel Vessel123."
+    }
+    ```
+  * **Error** – unexpected server-side problem (example)
+    ```json
+    {
+      "detail": "An unexpected error occurred: <error message>"
+    }
+    ```
+
 
 ### Suggest the latest hotspots
 
