@@ -1,8 +1,9 @@
 from fastapi import APIRouter, HTTPException
 from datetime import datetime
 from ..database import hotspots_vessels, fishing_locations, vessels_locations
-from ..models import LinkVesselHotspotRequest,VesselLocationRequest
+from ..models import LinkVesselHotspotRequest,VesselLocationRequest, UnlinkVesselHotspotRequest
 from ..utils import parse_location_data
+from pydantic import BaseModel
 
 router = APIRouter()
 
@@ -45,7 +46,40 @@ async def link_vessel_to_hotspot(request: LinkVesselHotspotRequest):
         raise HTTPException(
             status_code=500, detail=f"An unexpected error occurred: {str(e)}"
         )
-    
+
+@router.patch("/unlink_vessel_to_hotspot")
+async def unlink_vessel_to_hotspot(request: UnlinkVesselHotspotRequest):
+    try:
+        vessel_id = request.vessel_id
+
+        # How many active links does this vessel have?
+        link_count = hotspots_vessels.count_documents(
+            {"vesselId": vessel_id, "status": 1}
+        )
+        if link_count == 0:
+            return {
+                "status": "failed",
+                "message": f"No active hotspot links found for vessel {vessel_id}."
+            }
+
+        # Deactivate them
+        result = hotspots_vessels.update_many(
+            {"vesselId": vessel_id, "status": 1},
+            {"$set": {"status": 0, "unlinkedDateTime": datetime.now().isoformat()}}
+        )
+
+        return {
+            "status": "success",
+            "message": f"{result.modified_count} hotspot link(s) unlinked for vessel {vessel_id}."
+        }
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"An unexpected error occurred: {str(e)}"
+        )
+
 
 @router.post("/save_vessel_location")
 async def save_vessel_location(request: VesselLocationRequest):
