@@ -38,6 +38,7 @@ The system provides an API that can be queried with a latitude and longitude to 
   - id (string): Vessel ID and Message ID separated by a |
   - l (string): Latitude and Longitude saparated by a hyphen |
   - f (integer): Indicator (used to mark whether this is a fishing hotspot message)
+
 - Reqeusted Body Example:
 
   ```
@@ -47,6 +48,7 @@ The system provides an API that can be queried with a latitude and longitude to 
     "f": 1
   }
   ```
+
 - Response:
 
   - Success:
@@ -67,6 +69,7 @@ The system provides an API that can be queried with a latitude and longitude to 
       }
     }
     ```
+
   - Failure (Duplicate Location):
 
     ```
@@ -89,6 +92,7 @@ The system provides an API that can be queried with a latitude and longitude to 
     - "last year": Locations from the previous year.
   - start*date (string) *(optional)\_: Custom start date in YYYY-MM-DD format.
   - end*date (string) *(optional)\_: Custom end date in YYYY-MM-DD format.
+
 - if period is provided, start_date and the end_date are ignored.
 - Query parameter Examples:
 
@@ -97,21 +101,25 @@ The system provides an API that can be queried with a latitude and longitude to 
     ```
     /get_fishing_locations?period=month
     ```
+
   - Get locations for this year:
 
     ```
     /get_fishing_locations?period=year
     ```
+
   - Get locations for last year:
 
     ```
     /get_fishing_locations?period=last%20year
     ```
+
   - Get locations for a custom date range:
 
     ```
     /get_fishing_locations?start_date=2024-10-01&end_date=2024-12-01
     ```
+
 - Response:
 
   - Success:
@@ -141,6 +149,7 @@ The system provides an API that can be queried with a latitude and longitude to 
       ]
     }
     ```
+
   - Faliure:
 
     ```
@@ -158,6 +167,7 @@ The system provides an API that can be queried with a latitude and longitude to 
 
   - vessel_id: The vessel id that need to be allocated to the hotspot.
   - hotspot_id: The id of thr hotspot that vessle going to be allocated.
+
 - Requested Body Example:
 
   ```
@@ -166,6 +176,7 @@ The system provides an API that can be queried with a latitude and longitude to 
       "hotspot_id": 1
   }
   ```
+
 - Response:
 
   - Sucess:
@@ -183,6 +194,7 @@ The system provides an API that can be queried with a latitude and longitude to 
         }
     }
     ```
+
   -
   - Faliure:
 
@@ -195,33 +207,33 @@ The system provides an API that can be queried with a latitude and longitude to 
 
 ### Un-link vessel from any active hotspot(s)
 
-* **Endpoint: PATCH `/unlink_vessel_to_hotspot`**
-* This endpoint removes (sets `status = 0`) every *active* link between the given vessel and any hotspot.
-  If the vessel is already free (no active links), the call returns a *failed* status instead of silently succeeding.
-* **Body parameters** (JSON):
-  * `vessel_id` – **string** – ID of the vessel whose active hotspot links should be cleared.
-* **Request body example**
+- **Endpoint: PATCH `/unlink_vessel_to_hotspot`**
+- This endpoint removes (sets `status = 0`) every _active_ link between the given vessel and any hotspot.
+  If the vessel is already free (no active links), the call returns a _failed_ status instead of silently succeeding.
+- **Body parameters** (JSON):
+  - `vessel_id` – **string** – ID of the vessel whose active hotspot links should be cleared.
+- **Request body example**
   ```json
   {
     "vessel_id": "Vessel123"
   }
   ```
-* **Responses**
-  * **Success** – at least one active link was found and deactivated
+- **Responses**
+  - **Success** – at least one active link was found and deactivated
     ```json
     {
       "status": "success",
       "message": "1 hotspot link(s) unlinked for vessel Vessel123."
     }
     ```
-  * **Failure** – no active links exist for that vessel
+  - **Failure** – no active links exist for that vessel
     ```json
     {
       "status": "failed",
       "message": "No active hotspot links found for vessel Vessel123."
     }
     ```
-  * **Error** – unexpected server-side problem (example)
+  - **Error** – unexpected server-side problem (example)
     ```json
     {
       "detail": "An unexpected error occurred: <error message>"
@@ -237,6 +249,7 @@ The system provides an API that can be queried with a latitude and longitude to 
     /suggest_fishing_hotspots?latitude=37.7749&longitude=-122.4194
     ```
 - Response:
+
   - Success:
 
     ```
@@ -263,6 +276,7 @@ The system provides an API that can be queried with a latitude and longitude to 
         ]
     }
     ```
+
   - Faliure:
 
     ```
@@ -273,13 +287,14 @@ The system provides an API that can be queried with a latitude and longitude to 
 
 ### Save vessel location
 
-* **Endpoint: POST /save_vessel_location**
-* This API endpoint is used to save the vessels locations time-to-time in the database
-* Reqested Parameters:
+- **Endpoint: POST /save_vessel_location**
+- This API endpoint is used to save the vessels locations time-to-time in the database
+- Reqested Parameters:
 
-  * id (string): Vessel ID and Message ID separated by a |
-  * l (string): Latitude and Longitude saparated by a |
-* Requested Body Example:
+  - id (string): Vessel ID and Message ID separated by a |
+  - l (string): Latitude and Longitude saparated by a |
+
+- Requested Body Example:
 
   ```
   {
@@ -287,9 +302,10 @@ The system provides an API that can be queried with a latitude and longitude to 
       "l": "80.12321|13.32432"
   }
   ```
-* Response:
 
-  * Success:
+- Response:
+
+  - Success:
 
     ```
     {
@@ -304,7 +320,8 @@ The system provides an API that can be queried with a latitude and longitude to 
         }
     }
     ```
-  * Faliure (for wrong format: 001-0001):
+
+  - Faliure (for wrong format: 001-0001):
 
     ```
     {
@@ -314,11 +331,12 @@ The system provides an API that can be queried with a latitude and longitude to 
 
 ### Get Vessels locations
 
-* **Endpoint: GET /get_all_vessel_locations**
-* This API endpoint retrive all the vesses location from the database.
-* Response:
-  *
-  * Success:
+- **Endpoint: GET /get_all_vessel_locations**
+- This API endpoint retrive all the vesses location from the database.
+- Response:
+
+  -
+  - Success:
 
     ```
     {
@@ -348,7 +366,8 @@ The system provides an API that can be queried with a latitude and longitude to 
         ]
     }
     ```
-  * Faliure:
+
+  - Faliure:
 
     ```
     {
@@ -372,11 +391,13 @@ The system provides an API that can be queried with a latitude and longitude to 
   ```
   docker build -t fishing-hotspots-api .
   ```
+
 - Delete the existing container with the same names
 
   ```
   docker rm -f fishing-hotspots-api-container
   ```
+
 - Run the docker image
 
   - The port number might be change
@@ -388,6 +409,7 @@ The system provides an API that can be queried with a latitude and longitude to 
     -p 9002:9002 \
     fishing-hotspots-api
   ```
+
 - Check the status of the container
 
   ```
