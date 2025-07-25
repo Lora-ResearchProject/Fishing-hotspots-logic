@@ -245,9 +245,11 @@ The system provides an API that can be queried with a latitude and longitude to 
 - **Endpoint: GET /suggest_fishing_hotspots**
 - This API endpoint gives the currently avaialbe latest saved best fishing hotspots.
 - Query Parameters:
+
   - ```
     /suggest_fishing_hotspots?latitude=37.7749&longitude=-122.4194
     ```
+
 - Response:
 
   - Success:
@@ -408,6 +410,12 @@ The system provides an API that can be queried with a latitude and longitude to 
     --network aquesafe-net \
     -p 9002:9002 \
     fishing-hotspots-api
+  ```
+
+- Now you must use the following in the same server IP (do not the IP as it is)
+
+  ```
+  http://fishing-hotspots-api-container:9002
   ```
 
 - Check the status of the container
