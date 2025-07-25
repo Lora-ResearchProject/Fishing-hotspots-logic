@@ -193,7 +193,6 @@ The system provides an API that can be queried with a latitude and longitude to 
     }
     ```
 
-
 ### Un-link vessel from any active hotspot(s)
 
 * **Endpoint: PATCH `/unlink_vessel_to_hotspot`**
@@ -228,7 +227,6 @@ The system provides an API that can be queried with a latitude and longitude to 
       "detail": "An unexpected error occurred: <error message>"
     }
     ```
-
 
 ### Suggest the latest hotspots
 
@@ -374,12 +372,21 @@ The system provides an API that can be queried with a latitude and longitude to 
   ```
   docker build -t fishing-hotspots-api .
   ```
+- Delete the existing container with the same names
+
+  ```
+  docker rm -f fishing-hotspots-api-container
+  ```
 - Run the docker image
 
   - The port number might be change
 
   ```
-  docker run -d -p 9002:9002 --name fishing-hotspots-api-container fishing-hotspots-api
+  docker run -d \
+    --name fishing-hotspots-api-container \
+    --network aquesafe-net \
+    -p 9002:9002 \
+    fishing-hotspots-api
   ```
 - Check the status of the container
 
